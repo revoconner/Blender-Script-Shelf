@@ -6,7 +6,7 @@ Just copy and paste your scripts here to create buttons to run them later.
 Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf. So I created this, it's nto pretty and you cannot drag and drop scripts directly from the script editor, which is a bummer. But it's as close as I could get to a working shelf that doesn't require user to deal with files and folders during use.
 
 ## Video Tutorial and Demo
-Placeholder text for now
+Youtube Video: https://youtu.be/zgCNfnMXQSc 
 
 #### Script Panel
 
