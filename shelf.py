@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Script Shelf",
-    "author": "Rev",
+    "author": "Rév",
     "version": (1, 0),
     "blender": (3, 0, 0),
     "location": "View3D > N-Panel > Shelf",
@@ -166,8 +166,19 @@ class SHELF_OT_add_panel(Operator):
 
 class SHELF_OT_remove_panel(Operator):
     bl_idname = "shelf.remove_panel"
-    bl_label = "Remove Panel"
-    panel_name: StringProperty()
+    bl_label = "Remove Panel?"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    panel_name: StringProperty(options={'HIDDEN'})
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=400)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.separator()
+        layout.label(text=f"Removing '{self.panel_name}' will delete all scripts inside this panel.", icon='ERROR')
+        layout.separator()
     
     def execute(self, context):
         config = load_config()
@@ -180,6 +191,7 @@ class SHELF_OT_remove_panel(Operator):
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if os.path.exists(panel_dir):
                 shutil.rmtree(panel_dir)
+                
         return {'FINISHED'}
 
 class SHELF_OT_rename_panel(Operator):
