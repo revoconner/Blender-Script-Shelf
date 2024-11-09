@@ -19,9 +19,11 @@ Learnt blender last week and can't believe it lacks the basic function to store 
 ## Video Tutorial and Demo
 Youtube Video: https://youtu.be/zgCNfnMXQSc 
 
-**The demo lacks a few things that were added after the demo was recorded:**
+**The demo lacks Update 1.1 additions, that were added after the demo was recorded:**
 1. Editing exist script function has been added but not shown in demo.
 2. Add existing menu items from blender to the shelf for quick access. No mention of this in the demo.
+
+See [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog), for better understanding. These settings have been explained in [Use](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#use) section.
 
 #### Script Panel
 <img width="400" alt="image" src="https://github.com/user-attachments/assets/2ab84a03-fb2d-4bb9-9e42-ee787d96694f"> </br>
