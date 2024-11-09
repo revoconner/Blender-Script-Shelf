@@ -181,6 +181,12 @@ class SHELF_OT_remove_panel(Operator):
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if os.path.exists(panel_dir):
                 shutil.rmtree(panel_dir)
+            
+            
+            if hasattr(ShelfScriptProperties, f"expand_{self.panel_name}"):
+                delattr(ShelfScriptProperties, f"expand_{self.panel_name}")
+                bpy.utils.unregister_class(ShelfScriptProperties)
+                bpy.utils.register_class(ShelfScriptProperties)
                 
         return {'FINISHED'}
 
@@ -205,6 +211,20 @@ class SHELF_OT_rename_panel(Operator):
         config["panels"][idx] = self.new_name
         config["orders"][self.new_name] = config["orders"].pop(self.panel_name)
         save_config(config)
+        
+        
+        if hasattr(ShelfScriptProperties, f"expand_{self.panel_name}"):
+            
+            old_state = getattr(ShelfScriptProperties, f"expand_{self.panel_name}")
+            
+            delattr(ShelfScriptProperties, f"expand_{self.panel_name}")
+            
+            setattr(ShelfScriptProperties, f"expand_{self.new_name}", 
+                    bpy.props.BoolProperty(default=old_state))
+            
+            bpy.utils.unregister_class(ShelfScriptProperties)
+            bpy.utils.register_class(ShelfScriptProperties)
+            
         return {'FINISHED'}
         
     def invoke(self, context, event):
