@@ -9,7 +9,8 @@ Learnt blender last week and can't believe it lacks the basic function to store 
 Placeholder text for now
 
 #### Script Panel
-<img width="377" alt="image" src="https://github.com/user-attachments/assets/bd074c5d-9812-442a-8b7c-8c86a11854c8"> </br>
+
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/2ab84a03-fb2d-4bb9-9e42-ee787d96694f"> </br>
 #### Add New Script (Copies clipboard content into the script)
 <img width="377" alt="image" src="https://github.com/user-attachments/assets/0846f3d0-eaaf-44da-8891-19b8351920d7"> </br>
 #### Rename script or move it to another panel
