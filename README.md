@@ -14,7 +14,7 @@ Placeholder text for now
 <img width="377" alt="image" src="https://github.com/user-attachments/assets/fe678fce-12e5-4b89-b22c-6dea837a0944"> </br>
 
 ## Installation
-1. Run blender as administrator and open the install_dependencies.py file in the script editor, run it. (First time use only, or on new blender install) </br> This will install pyperclip module in the blender python lib-packages. If you do not run as admin, the module will install in the user lib-package directory that blender doesn't have on path. </br> <img width="500" alt="image" src="https://github.com/user-attachments/assets/247aa44a-3c22-4a91-af36-edf0d74b3725">
+1. Run blender as administrator and open the install_dependencies.py file in the script editor, run it. (First time use only, or on new blender install) </br> This will install pyperclip module in the blender python lib-packages. If you do not run as admin, the module will install in the user lib-package directory that blender doesn't have on path. Thanks to luckychris for making this script. </br> <img width="500" alt="image" src="https://github.com/user-attachments/assets/247aa44a-3c22-4a91-af36-edf0d74b3725">
 
 2. Install the shelf.py as an add on. </br> <img width="300" alt="image" src="https://github.com/user-attachments/assets/c8400d7c-1bca-4dc0-9772-851c8954e563">
 
