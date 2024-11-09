@@ -7,6 +7,15 @@ Organise them, rename them or sort them in the order you want.
 
 Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf. So I created this, it's nto pretty and you cannot drag and drop scripts directly from the script editor, which is a bummer. But it's as close as I could get to a working shelf that doesn't require user to deal with files and folders during use.
 
+# Contents
+1. [Video Tutorial and Demo](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#video-tutorial-and-demo)
+2. [Installation](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#installation)
+3. [Use](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#use)
+4. [Note](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#note)
+5. [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog)
+
+
+
 ## Video Tutorial and Demo
 Youtube Video: https://youtu.be/zgCNfnMXQSc 
 
