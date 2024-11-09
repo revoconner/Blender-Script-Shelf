@@ -562,6 +562,7 @@ class SHELF_OT_open_in_editor(Operator):
             self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
+
 class SHELF_OT_run_script(Operator):
     bl_idname = "shelf.run_script"
     bl_label = "Run Shelf Script"
@@ -575,14 +576,48 @@ class SHELF_OT_run_script(Operator):
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             script_path = os.path.join(panel_dir, f"{self.script_name}.py")
             
+            # Read the script content
             with open(script_path, 'r') as f:
                 script_content = f.read()
             
-            exec(compile(script_content, script_path, 'exec'))
+            # Create or get text block
+            text_name = f"##temp_{self.script_name}##"
+            if text_name in bpy.data.texts:
+                text = bpy.data.texts[text_name]
+                text.clear()
+            else:
+                text = bpy.data.texts.new(text_name)
+            
+            # Write content and run
+            text.write(script_content)
+            ctx = context.copy()
+            
+            # Store current area type
+            original_area_type = context.area.type
+            
+            # Temporarily change area type to TEXT_EDITOR
+            context.area.type = 'TEXT_EDITOR'
+            context.area.spaces.active.text = text
+            
+            # Run the script
+            bpy.ops.text.run_script()
+            
+            # Restore original area type
+            context.area.type = original_area_type
+            
+            # Clean up temporary text
+            bpy.data.texts.remove(text)
+            
             return {'FINISHED'}
+            
         except Exception as e:
             self.report({'ERROR'}, str(e))
+            # Ensure we clean up even if there's an error
+            if 'text_name' in locals() and text_name in bpy.data.texts:
+                bpy.data.texts.remove(bpy.data.texts[text_name])
             return {'CANCELLED'}
+
+
 
 classes = (
     ShelfScriptProperties,
