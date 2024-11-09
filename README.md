@@ -5,7 +5,9 @@ Just copy and paste your scripts here to create buttons to run them later.
 
 Organise them, rename them or sort them in the order you want.
 
-Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf. So I created this, it's nto pretty and you cannot drag and drop scripts directly from the script editor, which is a bummer. But it's as close as I could get to a working shelf that doesn't require user to deal with files and folders during use.
+Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf. So I created this, it's not pretty and you cannot drag and drop scripts directly from the script editor, which is a bummer. </br>
+But it's as close as I could get to a working shelf that doesn't require user to deal with files and folders during use. </br>
+No need to add create folders, add scripts manually or play around with folder structures. Everything is automated!
 
 # Contents
 1. [Video Tutorial and Demo](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#video-tutorial-and-demo)
@@ -69,4 +71,4 @@ Initial Commit
 #### 10/11/24
 Update 1.1 
 1. Added "Add to shelf" function to blender inbuilt items. Tools are not yet supported.
-2. Added the ability to edit sasved scripts from within blender.
+2. Added the ability to edit saved scripts from within blender.
