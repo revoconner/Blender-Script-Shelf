@@ -59,6 +59,7 @@ def get_shelf_scripts(panel_name):
 
 class ShelfScriptProperties(PropertyGroup):
     script_index: IntProperty()
+    expand: bpy.props.BoolVectorProperty(size=32, default=(True,)*32)  
 
 class SHELF_PT_Panel(Panel):
     bl_label = "Script Shelf"
@@ -71,50 +72,40 @@ class SHELF_PT_Panel(Panel):
         layout = self.layout
         config = load_config()
         
-        
         row = layout.row(align=True)
         row.alignment = 'RIGHT'
         row.operator("shelf.add_panel", text="Add Panel", icon='ADD')
         
-        
-        for panel_name in config["panels"]:
+        for idx, panel_name in enumerate(config["panels"]):
             box = layout.box()
-            
             
             header_row = box.row(align=True)
             
-            
             arrow = header_row.row()
-            arrow.prop(context.scene.shelf_properties, f"expand_{panel_name}",
-                      icon='TRIA_DOWN' if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True) 
+            arrow.prop(context.scene.shelf_properties, "expand", index=idx,
+                      icon='TRIA_DOWN' if context.scene.shelf_properties.expand[idx]
                       else 'TRIA_RIGHT',
                       icon_only=True, emboss=False)
             
-            
             header_row.label(text=panel_name)
-            
             
             buttons_row = header_row.row(align=True)
             buttons_row.alignment = 'RIGHT'
             
-            
             paste_op = buttons_row.operator("shelf.paste_script", text="", icon='ADD')
             paste_op.panel_name = panel_name
-            
             
             if len(config["panels"]) > 1:
                 buttons_row.operator("shelf.remove_panel", text="", icon='REMOVE').panel_name = panel_name
             buttons_row.operator("shelf.rename_panel", text="", icon='GREASEPENCIL').panel_name = panel_name
             
-            
-            if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True):
+            if context.scene.shelf_properties.expand[idx]:
                 scripts = get_shelf_scripts(panel_name)
                     
                 if scripts:
-                    for idx, script in enumerate(scripts):
+                    for script_idx, script in enumerate(scripts):
                         script_row = box.row(align=True)
-                        script_row.separator(factor=1)  
-                        
+                        script_row.separator(factor=1)
                         
                         run_op = script_row.operator("shelf.run_script", text=script)
                         run_op.script_name = script
@@ -129,28 +120,37 @@ class SHELF_PT_Panel(Panel):
                         rename_op.script_name = script
                         rename_op.panel_name = panel_name
                         ops_row.separator(factor=1)
-                                
-                        if idx > 0:
+                        
+                        
+                        if script_idx > 0:
                             up_op = ops_row.operator("shelf.move_script", text="", icon='TRIA_UP')
                             up_op.script_name = script
                             up_op.panel_name = panel_name
                             up_op.direction = 'UP'
+                        else:
+                            dummy_row = ops_row.row()
+                            dummy_row.scale_x = 1.0
+                            dummy_row.label(text="", icon='BLANK1') 
 
-                        if idx < len(scripts) - 1:
+                        
+                        if script_idx < len(scripts) - 1:
                             down_op = ops_row.operator("shelf.move_script", text="", icon='TRIA_DOWN')
                             down_op.script_name = script
                             down_op.panel_name = panel_name
                             down_op.direction = 'DOWN'
+                        else:
+                            dummy_row = ops_row.row()
+                            dummy_row.scale_x = 1.0
+                            dummy_row.label(text="", icon='BLANK1') 
                         
                         ops_row.separator(factor=1)
                         del_op = ops_row.operator("shelf.delete_script", text="", icon='X')
                         del_op.script_name = script
                         del_op.panel_name = panel_name
-                else:
-                    box_row = box.row()
-                    box_row.separator(factor=1)
-                    box_row.label(text="No scripts added yet")
-                    
+
+
+
+
 class SHELF_OT_add_panel(Operator):
     bl_idname = "shelf.add_panel"
     bl_label = "Add Panel"
@@ -176,18 +176,10 @@ class SHELF_OT_remove_panel(Operator):
             del config["orders"][self.panel_name]
             save_config(config)
             
-            
             import shutil
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if os.path.exists(panel_dir):
                 shutil.rmtree(panel_dir)
-            
-            
-            if hasattr(ShelfScriptProperties, f"expand_{self.panel_name}"):
-                delattr(ShelfScriptProperties, f"expand_{self.panel_name}")
-                bpy.utils.unregister_class(ShelfScriptProperties)
-                bpy.utils.register_class(ShelfScriptProperties)
-                
         return {'FINISHED'}
 
 class SHELF_OT_rename_panel(Operator):
@@ -201,30 +193,14 @@ class SHELF_OT_rename_panel(Operator):
         config = load_config()
         idx = config["panels"].index(self.panel_name)
         
-        
         old_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
         new_dir = os.path.join(ensure_shelf_dir(), self.new_name)
         if os.path.exists(old_dir):
             os.rename(old_dir, new_dir)
             
-        
         config["panels"][idx] = self.new_name
         config["orders"][self.new_name] = config["orders"].pop(self.panel_name)
         save_config(config)
-        
-        
-        if hasattr(ShelfScriptProperties, f"expand_{self.panel_name}"):
-            
-            old_state = getattr(ShelfScriptProperties, f"expand_{self.panel_name}")
-            
-            delattr(ShelfScriptProperties, f"expand_{self.panel_name}")
-            
-            setattr(ShelfScriptProperties, f"expand_{self.new_name}", 
-                    bpy.props.BoolProperty(default=old_state))
-            
-            bpy.utils.unregister_class(ShelfScriptProperties)
-            bpy.utils.register_class(ShelfScriptProperties)
-            
         return {'FINISHED'}
         
     def invoke(self, context, event):
