@@ -10,13 +10,20 @@ But it's as close as I could get to a working shelf that doesn't require user to
 No need to add create folders, add scripts manually or play around with folder structures. Everything is automated!
 
 # Contents
-1. [Video Tutorial and Demo](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#video-tutorial-and-demo)
-2. [Installation](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#installation)
-3. [Use](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#use)
-4. [Note](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#note)
-5. [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog)
+1. [Features](https://github.com/revoconner/Blender-Script-Shelf/edit/main/README.md#contents)
+2. [Video Tutorial and Demo](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#video-tutorial-and-demo)
+3. [Installation](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#installation)
+4. [Use](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#use)
+5. [Note](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#note)
+6. [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog)
 
-
+## Features
+1. Copy and paste script to shelves. As close as drag and drop as it can get.
+2. Reorder them, rename them from within blender.
+3. Edit saved scripts from within blender.
+4. Add blender in-built items to the shelve with right click and add to shelf.
+5. Organise and reorder the shelf, subpanel, items. Move items between subpanels.
+6. Shelves can be backed up between blender installations.
 
 ## Video Tutorial and Demo
 Youtube Video: https://youtu.be/zgCNfnMXQSc 
