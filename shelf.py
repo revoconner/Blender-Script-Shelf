@@ -35,7 +35,6 @@ def load_config():
             return json.load(f)
     default_config = {
         "panels": ["Script Shelf 1"],
-        "current_panel": "Script Shelf 1",
         "orders": {"Script Shelf 1": []}
     }
     save_config(default_config)
@@ -87,13 +86,12 @@ class SHELF_PT_Panel(Panel):
             # Expand/collapse arrow
             arrow = header_row.row()
             arrow.prop(context.scene.shelf_properties, f"expand_{panel_name}",
-                        icon='TRIA_DOWN' if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True) 
-                        else 'TRIA_RIGHT',
-                        icon_only=True, emboss=False)
+                      icon='TRIA_DOWN' if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True) 
+                      else 'TRIA_RIGHT',
+                      icon_only=True, emboss=False)
             
-            # Panel name (use operator to make clickable)
-            op = header_row.operator("shelf.set_active_panel", text=panel_name, depress=(panel_name == config["current_panel"]))
-            op.panel_name = panel_name
+            # Panel name (no longer a button)
+            header_row.label(text=panel_name)
             
             # Panel management icons aligned right
             buttons_row = header_row.row(align=True)
@@ -116,7 +114,11 @@ class SHELF_PT_Panel(Panel):
                     for idx, script in enumerate(scripts):
                         script_row = box.row(align=True)
                         script_row.separator(factor=1)  # Indent
-                        script_row.operator("shelf.run_script", text=script).script_name = script
+                        
+                        # Run script operator
+                        run_op = script_row.operator("shelf.run_script", text=script)
+                        run_op.script_name = script
+                        run_op.panel_name = panel_name
                         
                         ops_row = script_row.row(align=True)
                         ops_row.scale_x = 1
@@ -149,12 +151,10 @@ class SHELF_PT_Panel(Panel):
                     box_row.separator(factor=1)
                     box_row.label(text="No scripts added yet")
                     
-                    
 class SHELF_OT_add_panel(Operator):
     bl_idname = "shelf.add_panel"
     bl_label = "Add Panel"
     
-    panel_name: StringProperty()
     def execute(self, context):
         config = load_config()
         new_number = len(config["panels"]) + 1
@@ -164,34 +164,21 @@ class SHELF_OT_add_panel(Operator):
         save_config(config)
         return {'FINISHED'}
 
-class SHELF_OT_set_active_panel(Operator):
-    bl_idname = "shelf.set_active_panel"
-    bl_label = "Set Active Panel"
-    
-    panel_name: StringProperty()
-    
-    def execute(self, context):
-        config = load_config()
-        config["current_panel"] = self.panel_name
-        save_config(config)
-        return {'FINISHED'}
-
 class SHELF_OT_remove_panel(Operator):
     bl_idname = "shelf.remove_panel"
-    bl_label = "Remove Current Panel"
+    bl_label = "Remove Panel"
     panel_name: StringProperty()
+    
     def execute(self, context):
         config = load_config()
         if len(config["panels"]) > 1:
-            current = config["current_panel"]
-            config["panels"].remove(current)
-            del config["orders"][current]
-            config["current_panel"] = config["panels"][0]
+            config["panels"].remove(self.panel_name)
+            del config["orders"][self.panel_name]
             save_config(config)
             
             # Remove panel directory
             import shutil
-            panel_dir = os.path.join(ensure_shelf_dir(), current)
+            panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if os.path.exists(panel_dir):
                 shutil.rmtree(panel_dir)
                 
@@ -206,38 +193,23 @@ class SHELF_OT_rename_panel(Operator):
     
     def execute(self, context):
         config = load_config()
-        current = config["current_panel"]
-        idx = config["panels"].index(current)
+        idx = config["panels"].index(self.panel_name)
         
         # Rename directory
-        old_dir = os.path.join(ensure_shelf_dir(), current)
+        old_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
         new_dir = os.path.join(ensure_shelf_dir(), self.new_name)
         if os.path.exists(old_dir):
             os.rename(old_dir, new_dir)
             
         # Update config
         config["panels"][idx] = self.new_name
-        config["orders"][self.new_name] = config["orders"].pop(current)
-        config["current_panel"] = self.new_name
+        config["orders"][self.new_name] = config["orders"].pop(self.panel_name)
         save_config(config)
         return {'FINISHED'}
         
     def invoke(self, context, event):
-        config = load_config()
-        self.new_name = config["current_panel"]
+        self.new_name = self.panel_name
         return context.window_manager.invoke_props_dialog(self)
-
-class SHELF_OT_switch_panel(Operator):
-    bl_idname = "shelf.switch_panel"
-    bl_label = "Switch Panel"
-    
-    panel_name: StringProperty()
-    
-    def execute(self, context):
-        config = load_config()
-        config["current_panel"] = self.panel_name
-        save_config(config)
-        return {'FINISHED'}
 
 class SHELF_OT_paste_script(Operator):
     bl_idname = "shelf.paste_script"
@@ -245,7 +217,7 @@ class SHELF_OT_paste_script(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     
     script_name: StringProperty(name="Script Name", default="New Script")
-    panel_name: StringProperty()
+    panel_name: StringProperty(options={'HIDDEN'})
 
     def execute(self, context):
         try:
@@ -254,10 +226,7 @@ class SHELF_OT_paste_script(Operator):
                 self.report({'ERROR'}, "Clipboard is empty!")
                 return {'CANCELLED'}
             
-            config = load_config()
-            current_panel = config["current_panel"]
-            
-            panel_dir = os.path.join(ensure_shelf_dir(), current_panel)
+            panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if not os.path.exists(panel_dir):
                 os.makedirs(panel_dir)
                 
@@ -266,10 +235,11 @@ class SHELF_OT_paste_script(Operator):
             with open(script_path, 'w') as f:
                 f.write(script_content)
             
-            if current_panel not in config["orders"]:
-                config["orders"][current_panel] = []
+            config = load_config()
+            if self.panel_name not in config["orders"]:
+                config["orders"][self.panel_name] = []
                 
-            config["orders"][current_panel].append(self.script_name)
+            config["orders"][self.panel_name].append(self.script_name)
             save_config(config)
             
             return {'FINISHED'}
@@ -288,11 +258,7 @@ class SHELF_OT_rename_script(Operator):
     script_name: StringProperty(options={'HIDDEN'})
     new_name: StringProperty(name="New Name")
     panel_name: StringProperty(options={'HIDDEN'})
-    target_panel: StringProperty(
-        name="Panel",
-        description="Target panel for the script"
-    )
-
+    
     def get_panels(self, context):
         config = load_config()
         return [(name, name, "") for name in config["panels"]]
@@ -309,22 +275,17 @@ class SHELF_OT_rename_script(Operator):
             current_panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             target_panel_dir = os.path.join(ensure_shelf_dir(), self.target_panel)
             
-            # Create target directory if it doesn't exist
             if not os.path.exists(target_panel_dir):
                 os.makedirs(target_panel_dir)
             
             old_path = os.path.join(current_panel_dir, f"{self.script_name}.py")
             new_path = os.path.join(target_panel_dir, f"{self.new_name}.py")
             
-            # Move and rename file
             os.rename(old_path, new_path)
             
-            # Update orders in config
-            # Remove from old panel
             if self.script_name in config["orders"][self.panel_name]:
                 config["orders"][self.panel_name].remove(self.script_name)
             
-            # Add to new panel
             if self.target_panel not in config["orders"]:
                 config["orders"][self.target_panel] = []
             config["orders"][self.target_panel].append(self.new_name)
@@ -357,11 +318,10 @@ class SHELF_OT_move_script(Operator):
 
     def execute(self, context):
         config = load_config()
-        current_panel = config["current_panel"]
-        order = config["orders"][current_panel]
+        order = config["orders"][self.panel_name]
         
         if self.script_name not in order:
-            order = get_shelf_scripts(current_panel)
+            order = get_shelf_scripts(self.panel_name)
             
         idx = order.index(self.script_name)
         if self.direction == 'UP' and idx > 0:
@@ -369,7 +329,7 @@ class SHELF_OT_move_script(Operator):
         elif self.direction == 'DOWN' and idx < len(order) - 1:
             order[idx], order[idx+1] = order[idx+1], order[idx]
             
-        config["orders"][current_panel] = order
+        config["orders"][self.panel_name] = order
         save_config(config)
         return {'FINISHED'}
 
@@ -383,14 +343,13 @@ class SHELF_OT_delete_script(Operator):
 
     def execute(self, context):
         try:
-            config = load_config()
-            current_panel = config["current_panel"]
-            panel_dir = os.path.join(ensure_shelf_dir(), current_panel)
+            panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             script_path = os.path.join(panel_dir, f"{self.script_name}.py")
             
             os.remove(script_path)
             
-            order = config["orders"][current_panel]
+            config = load_config()
+            order = config["orders"][self.panel_name]
             if self.script_name in order:
                 order.remove(self.script_name)
                 save_config(config)
@@ -410,9 +369,7 @@ class SHELF_OT_run_script(Operator):
 
     def execute(self, context):
         try:
-            config = load_config()
-            current_panel = config["current_panel"]
-            panel_dir = os.path.join(ensure_shelf_dir(), current_panel)
+            panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             script_path = os.path.join(panel_dir, f"{self.script_name}.py")
             
             with open(script_path, 'r') as f:
@@ -435,8 +392,6 @@ classes = (
     SHELF_OT_add_panel,
     SHELF_OT_remove_panel,
     SHELF_OT_rename_panel,
-    SHELF_OT_switch_panel,
-    SHELF_OT_set_active_panel,
 )
 
 def register():
