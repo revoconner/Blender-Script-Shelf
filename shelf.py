@@ -71,51 +71,51 @@ class SHELF_PT_Panel(Panel):
         layout = self.layout
         config = load_config()
         
-        # Add panel button at top
+        
         row = layout.row(align=True)
         row.alignment = 'RIGHT'
         row.operator("shelf.add_panel", text="Add Panel", icon='ADD')
         
-        # Draw each sub-panel
+        
         for panel_name in config["panels"]:
             box = layout.box()
             
-            # Panel header
+            
             header_row = box.row(align=True)
             
-            # Expand/collapse arrow
+            
             arrow = header_row.row()
             arrow.prop(context.scene.shelf_properties, f"expand_{panel_name}",
                       icon='TRIA_DOWN' if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True) 
                       else 'TRIA_RIGHT',
                       icon_only=True, emboss=False)
             
-            # Panel name (no longer a button)
+            
             header_row.label(text=panel_name)
             
-            # Panel management icons aligned right
+            
             buttons_row = header_row.row(align=True)
             buttons_row.alignment = 'RIGHT'
             
-            # Add script button
+            
             paste_op = buttons_row.operator("shelf.paste_script", text="", icon='ADD')
             paste_op.panel_name = panel_name
             
-            # Panel management buttons
+            
             if len(config["panels"]) > 1:
                 buttons_row.operator("shelf.remove_panel", text="", icon='REMOVE').panel_name = panel_name
             buttons_row.operator("shelf.rename_panel", text="", icon='GREASEPENCIL').panel_name = panel_name
             
-            # Draw scripts if expanded
+            
             if getattr(context.scene.shelf_properties, f"expand_{panel_name}", True):
                 scripts = get_shelf_scripts(panel_name)
                     
                 if scripts:
                     for idx, script in enumerate(scripts):
                         script_row = box.row(align=True)
-                        script_row.separator(factor=1)  # Indent
+                        script_row.separator(factor=1)  
                         
-                        # Run script operator
+                        
                         run_op = script_row.operator("shelf.run_script", text=script)
                         run_op.script_name = script
                         run_op.panel_name = panel_name
@@ -176,7 +176,7 @@ class SHELF_OT_remove_panel(Operator):
             del config["orders"][self.panel_name]
             save_config(config)
             
-            # Remove panel directory
+            
             import shutil
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             if os.path.exists(panel_dir):
@@ -195,13 +195,13 @@ class SHELF_OT_rename_panel(Operator):
         config = load_config()
         idx = config["panels"].index(self.panel_name)
         
-        # Rename directory
+        
         old_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
         new_dir = os.path.join(ensure_shelf_dir(), self.new_name)
         if os.path.exists(old_dir):
             os.rename(old_dir, new_dir)
             
-        # Update config
+        
         config["panels"][idx] = self.new_name
         config["orders"][self.new_name] = config["orders"].pop(self.panel_name)
         save_config(config)
@@ -399,14 +399,14 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.shelf_properties = PointerProperty(type=ShelfScriptProperties)
     
-    # Add expand properties for each panel
+    
     config = load_config()
     for panel in config["panels"]:
         setattr(ShelfScriptProperties, f"expand_{panel}", 
                 bpy.props.BoolProperty(default=True))
 
 def unregister():
-    # Remove dynamic properties
+    
     config = load_config()
     for panel in config["panels"]:
         if hasattr(ShelfScriptProperties, f"expand_{panel}"):
