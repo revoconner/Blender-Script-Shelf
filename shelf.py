@@ -1,10 +1,10 @@
 bl_info = {
     "name": "Script Shelf",
-    "author": "Rév",
-    "version": (1, 0),
+    "author": "Rev",
+    "version": (1, 1),
     "blender": (3, 0, 0),
     "location": "View3D > N-Panel > Shelf",
-    "description": "Script shelfs",
+    "description": "Save custom scripts or menu items to shelf",
     "category": "Development",
 }
 
@@ -61,6 +61,7 @@ class ShelfScriptProperties(PropertyGroup):
     script_index: IntProperty()
     expand: bpy.props.BoolVectorProperty(size=32, default=(True,)*32)  
 
+#Main panel
 class SHELF_PT_Panel(Panel):
     bl_label = "Script Shelf"
     bl_idname = "VIEW3D_PT_shelf"
@@ -115,12 +116,15 @@ class SHELF_PT_Panel(Panel):
                         ops_row.scale_x = 1
                         ops_row.alignment = 'RIGHT'
                         
+                        edit_op = ops_row.operator("shelf.open_in_editor", text="", icon='TEXT')
+                        edit_op.script_name = script
+                        edit_op.panel_name = panel_name
+                        
                         ops_row.separator(factor=1)
                         rename_op = ops_row.operator("shelf.rename_script", text="", icon='GREASEPENCIL')
                         rename_op.script_name = script
                         rename_op.panel_name = panel_name
                         ops_row.separator(factor=1)
-                        
                         
                         if script_idx > 0:
                             up_op = ops_row.operator("shelf.move_script", text="", icon='TRIA_UP')
@@ -131,7 +135,6 @@ class SHELF_PT_Panel(Panel):
                             dummy_row = ops_row.row()
                             dummy_row.scale_x = 1.0
                             dummy_row.label(text="", icon='BLANK1') 
-
                         
                         if script_idx < len(scripts) - 1:
                             down_op = ops_row.operator("shelf.move_script", text="", icon='TRIA_DOWN')
@@ -149,6 +152,150 @@ class SHELF_PT_Panel(Panel):
                         del_op.panel_name = panel_name
 
 
+
+# To add context menu
+def button_context_menu_extend(self, context):
+    layout = self.layout
+    layout.separator()
+    
+    if context.button_operator:
+        op = context.button_operator
+        try:
+            # Get operator ID from RNA type
+            rna_type = op.rna_type
+            identifier = rna_type.identifier
+            
+            # Convert from format like 'WM_OT_tool_set_by_id' to 'wm.tool_set_by_id'
+            if '_OT_' in identifier:
+                prefix, name = identifier.lower().split('_ot_')
+                op_id = f"{prefix}.{name}"
+                
+                # Get properties
+                props = {}
+                for prop in rna_type.properties:
+                    if prop.identifier not in {'rna_type'}:
+                        try:
+                            value = getattr(op, prop.identifier)
+                            # Skip empty/zero scales
+                            if prop.identifier == 'scale' and all(v == 0 for v in value):
+                                continue
+                            # Handle vectors and other sequences
+                            if hasattr(value, '__len__') and not isinstance(value, str):
+                                value = tuple(value)
+                            props[prop.identifier] = value
+                        except AttributeError:
+                            continue
+                
+                # Special handling for tool_set_by_id operator
+                if op_id == "wm.tool_set_by_id":
+                    # Get the active tool name if available
+                    if hasattr(context.workspace, 'tools'):
+                        for tool in context.workspace.tools:
+                            if tool.is_active:
+                                props['name'] = tool.idname
+                                break
+                    # Set the correct space type
+                    if hasattr(context.space_data, 'type'):
+                        props['space_type'] = context.space_data.type
+                    else:
+                        props['space_type'] = 'VIEW_3D'  # default to 3D view
+                
+                add_op = layout.operator("shelf.add_to_shelf", text="Add to Script Shelf", icon='PLUS')
+                add_op.operator_id = op_id
+                add_op.operator_properties = str(props)
+            else:
+                layout.label(text="Cannot add this operation to shelf", icon='ERROR')
+        except Exception as e:
+            print(f"Error in context menu: {str(e)}")
+            layout.label(text="Cannot add this operation to shelf", icon='ERROR')
+
+# to add context menu - doesnt collapse very well in vs code, keep in mind
+class SHELF_OT_add_to_shelf(Operator):
+    bl_idname = "shelf.add_to_shelf"
+    bl_label = "Add to Script Shelf"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    operator_id: StringProperty()
+    operator_properties: StringProperty()
+
+    def execute(self, context):
+        if not self.operator_id:
+            self.report({'ERROR'}, "No operator selected")
+            return {'CANCELLED'}
+
+        try:
+            # Get a nice name for the script
+            script_name = self.operator_id.split('.')[-1]  
+            
+            # Convert string properties to proper keyword arguments
+            props_dict = eval(self.operator_properties) if self.operator_properties else {}
+            
+            # Special case for tool_set_by_id operator
+            if self.operator_id == "wm.tool_set_by_id" and 'name' not in props_dict:
+                # Try to get active tool name
+                for tool in context.workspace.tools:
+                    if tool.is_active:
+                        props_dict['name'] = tool.idname
+                        break
+            
+            props_str = ', '.join(f"{k}={repr(v)}" for k, v in props_dict.items())
+            
+            # Create script content from operator
+            script_content = f"""import bpy
+
+def run():
+    # Operator: {self.operator_id}
+    try:
+        bpy.ops.{self.operator_id}({props_str})
+    except Exception as e:
+        print(f"Error running shelf script: {{str(e)}}")
+
+if __name__ == "__main__":
+    run()
+"""
+            # Ensure "Blender Items" panel exists
+            config = load_config()
+            if "Blender Items" not in config["panels"]:
+                config["panels"].append("Blender Items")
+                config["orders"]["Blender Items"] = []
+                save_config(config)
+
+            # Save as script
+            panel_dir = os.path.join(ensure_shelf_dir(), "Blender Items")
+            if not os.path.exists(panel_dir):
+                os.makedirs(panel_dir)
+
+            # Make the script name more readable
+            script_name = script_name.replace('_', ' ').title()
+            if self.operator_id == "wm.tool_set_by_id" and 'name' in props_dict:
+                # Use the tool name for the script name
+                tool_name = props_dict['name'].split('.')[-1]
+                script_name = tool_name.replace('_', ' ').title()
+                
+            script_path = os.path.join(panel_dir, f"{script_name}.py")
+
+            # Check if file exists and append number if it does
+            base_name = script_name
+            counter = 1
+            while os.path.exists(script_path):
+                script_name = f"{base_name} {counter}"
+                script_path = os.path.join(panel_dir, f"{script_name}.py")
+                counter += 1
+
+            with open(script_path, 'w') as f:
+                f.write(script_content)
+
+            # Update config
+            if script_name not in config["orders"]["Blender Items"]:
+                config["orders"]["Blender Items"].append(script_name)
+                save_config(config)
+
+            self.report({'INFO'}, f"Added {script_name} to Script Shelf")
+            return {'FINISHED'}
+            
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            return {'CANCELLED'}
 
 
 class SHELF_OT_add_panel(Operator):
@@ -367,6 +514,54 @@ class SHELF_OT_delete_script(Operator):
             self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
 
+class SHELF_OT_open_in_editor(Operator):
+    bl_idname = "shelf.open_in_editor"
+    bl_label = "Open in Text Editor"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    script_name: StringProperty()
+    panel_name: StringProperty()
+
+    def execute(self, context):
+        try:
+            # Get the script path
+            panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
+            script_path = os.path.join(panel_dir, f"{self.script_name}.py")
+            with open(script_path, 'r') as f:
+                script_content = f.read()
+            
+            text_name = f"{self.script_name}.py"
+            text = None
+            
+            if text_name in bpy.data.texts:
+                text = bpy.data.texts[text_name]
+                text.clear()
+            else:
+                text = bpy.data.texts.new(text_name)
+            
+            text.write(script_content)
+            
+            # Switch to text editor if we can find it
+            for area in context.screen.areas:
+                if area.type == 'TEXT_EDITOR':
+                    for space in area.spaces:
+                        if space.type == 'TEXT_EDITOR':
+                            space.text = text
+                            break
+                    break
+            else:
+                # If no text editor is open, try to split the current area
+                area = context.area
+                if area:
+                    bpy.ops.screen.area_split(direction='VERTICAL', factor=0.5)
+                    area.type = 'TEXT_EDITOR'
+                    area.spaces.active.text = text
+            
+            return {'FINISHED'}
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+            return {'CANCELLED'}
+
 class SHELF_OT_run_script(Operator):
     bl_idname = "shelf.run_script"
     bl_label = "Run Shelf Script"
@@ -399,27 +594,27 @@ classes = (
     SHELF_OT_run_script,
     SHELF_OT_add_panel,
     SHELF_OT_remove_panel,
+    SHELF_OT_add_to_shelf,
     SHELF_OT_rename_panel,
+    SHELF_OT_open_in_editor,
 )
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.shelf_properties = PointerProperty(type=ShelfScriptProperties)
-    
-    
+    bpy.types.UI_MT_button_context_menu.append(button_context_menu_extend)
     config = load_config()
     for panel in config["panels"]:
         setattr(ShelfScriptProperties, f"expand_{panel}", 
                 bpy.props.BoolProperty(default=True))
 
 def unregister():
-    
+    bpy.types.UI_MT_button_context_menu.remove(button_context_menu_extend)
     config = load_config()
     for panel in config["panels"]:
         if hasattr(ShelfScriptProperties, f"expand_{panel}"):
-            delattr(ShelfScriptProperties, f"expand_{panel}")
-            
+            delattr(ShelfScriptProperties, f"expand_{panel}")         
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Scene.shelf_properties
