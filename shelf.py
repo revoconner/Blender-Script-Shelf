@@ -527,6 +527,7 @@ class SHELF_OT_open_in_editor(Operator):
             # Get the script path
             panel_dir = os.path.join(ensure_shelf_dir(), self.panel_name)
             script_path = os.path.join(panel_dir, f"{self.script_name}.py")
+            
             with open(script_path, 'r') as f:
                 script_content = f.read()
             
@@ -539,6 +540,8 @@ class SHELF_OT_open_in_editor(Operator):
             else:
                 text = bpy.data.texts.new(text_name)
             
+            # Set the filepath so Blender knows where to save
+            text.filepath = script_path
             text.write(script_content)
             
             # Switch to text editor if we can find it
@@ -561,7 +564,6 @@ class SHELF_OT_open_in_editor(Operator):
         except Exception as e:
             self.report({'ERROR'}, str(e))
             return {'CANCELLED'}
-
 
 class SHELF_OT_run_script(Operator):
     bl_idname = "shelf.run_script"
