@@ -79,3 +79,4 @@ Initial Commit
 Update 1.1 
 1. Added "Add to shelf" function to blender inbuilt items. Tools are not yet supported.
 2. Added the ability to edit saved scripts from within blender.
+3. Bug Fixes
