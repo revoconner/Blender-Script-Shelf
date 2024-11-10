@@ -1,5 +1,7 @@
 # Blender Scripts Shelf
-### Alpha - Add to shelf from context menu (If you encounter bugs, please report)
+### Add to shelf from context menu is in Alpha (Has a megathread in the issue tab, report bugs there)
+### The rest of the script is in Beta, works well but can encounter non critical bugs from time to time. 
+### If you encounter bugs, please report
 A blender add-on for having custom scripts on a shelf, like maya's shelf or 3ds max custom toolbar.
 Just copy and paste your scripts here to create buttons to run them later.
 
