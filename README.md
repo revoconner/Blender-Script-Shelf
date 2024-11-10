@@ -1,11 +1,11 @@
 # Blender Scripts Shelf
-#### Alpha - Expect minor bugs
+### Alpha - Add to shelf from context menu (If you encounter bugs, please report)
 A blender add-on for having custom scripts on a shelf, like maya's shelf or 3ds max custom toolbar.
 Just copy and paste your scripts here to create buttons to run them later.
 
-Organise them, rename them or sort them in the order you want.
-
-Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf. So I created this, it's not pretty and you cannot drag and drop scripts directly from the script editor, which is a bummer. </br>
+Organise them, rename them or sort them in the order you want.</br></br>
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/2e53b130-fe57-4bfe-aaf5-9f5b157447e8"> </br></br>
+Learnt blender last week and can't believe it lacks the basic function to store scripts in a custom shelf.</br>
 But it's as close as I could get to a working shelf that doesn't require user to deal with files and folders during use. </br>
 No need to add create folders, add scripts manually or play around with folder structures. Everything is automated!
 
@@ -18,12 +18,23 @@ No need to add create folders, add scripts manually or play around with folder s
 6. [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog)
 
 ## Features
-1. Copy and paste script to shelves. As close as drag and drop as it can get.
-2. Reorder them, rename them from within blender.
-3. Edit saved scripts from within blender.
-4. Add blender in-built items to the shelve with right click and add to shelf.
-5. Organise and reorder the shelf, subpanel, items. Move items between subpanels.
-6. Shelves can be backed up between blender installations.
+1. Copy and paste script to shelves. As close as drag and drop as it can get. </br></br>
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/d1d35c19-79c0-4ca4-8dd4-637f952a7a53"> </br>
+</br>
+2. Reorder them, rename them from within blender. </br> Organise and reorder the shelf, subpanel, items. Move items between subpanels.</br></br>
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/a0af6180-4f69-4c66-bcb2-7f97edc31928"> </br>
+</br>
+3. Edit saved scripts from within blender.</br></br>
+<img width="600" alt="image" src="https://github.com/user-attachments/assets/0a096278-45ab-4d2c-9929-76ae371297cb"> </br>
+</br>
+4. Add blender in-built items to the shelve with right click and add to shelf.</br></br>
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/dee0ae9e-284c-49aa-ab13-362c8e438b06"> </br>
+</br>
+5. Remove a panel, or delete a script </br></br>
+<img width="400" alt="image" src="https://github.com/user-attachments/assets/234346c1-4bdf-4b1d-b100-c528bc31b34a"> </br>
+</br>
+6. Shelves can be backed up between blender installations.</br>
+Just save **%appdata%\Blender Foundation\Blender\4.2\scripts\addons** somewhere
 
 ## Video Tutorial and Demo
 Youtube Video: https://youtu.be/zgCNfnMXQSc 
@@ -34,22 +45,8 @@ Youtube Video: https://youtu.be/zgCNfnMXQSc
 
 See [Changelog](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#changelog), for better understanding. These settings have been explained in [Use](https://github.com/revoconner/Blender-Script-Shelf/blob/main/README.md#use) section.
 
-#### Script Panel
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/2ab84a03-fb2d-4bb9-9e42-ee787d96694f"> </br>
-#### Add New Script (Copies clipboard content into the script)
-<img width="377" alt="image" src="https://github.com/user-attachments/assets/0846f3d0-eaaf-44da-8891-19b8351920d7"> </br>
-#### Rename script or move it to another panel
-<img width="377" alt="image" src="https://github.com/user-attachments/assets/fe678fce-12e5-4b89-b22c-6dea837a0944"> </br>
-#### Remove a panel
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/3c98f75b-b47d-4bba-9afc-77af7b763f06"> </br>
-#### Editing saved script directly in blender. (No more messing around in folders) - UPDATE 1.1
-Click the icon underlines to open the script in the inbuilt text editor. Save the script to save changes.
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/ec738c23-6c1e-4054-abd7-88f1b21e28f3"> </br>
-#### Add blender items to the shelf for quick access - UPDATE 1.1
-<img width="400" alt="image" src="https://github.com/user-attachments/assets/241dffc2-673d-452c-bf14-d577794771d1"> </br>
-
 ## Installation
-1. Run blender as administrator and open the install_dependencies.py file in the script editor, run it. (First time use only, or on new blender install) </br> This will install pyperclip module in the blender python lib-packages. If you do not run as admin, the module will install in the user lib-package directory that blender doesn't have on path. Thanks to luckychris for making this script. </br> <img width="500" alt="image" src="https://github.com/user-attachments/assets/247aa44a-3c22-4a91-af36-edf0d74b3725">
+1. Run blender as administrator and open the install_dependencies.py file in the script editor, run it. (First time use only, or on new blender install) </br> This will install pyperclip module in the blender python lib-packages. If you do not run as admin, the module will install in the user lib-package directory that blender doesn't have on path. Thanks to luckychris for making this script. </br> <img width="700" alt="image" src="https://github.com/user-attachments/assets/247aa44a-3c22-4a91-af36-edf0d74b3725">
 
 2. Install the shelf.py as an add on. </br> <img width="300" alt="image" src="https://github.com/user-attachments/assets/c8400d7c-1bca-4dc0-9772-851c8954e563">
 
