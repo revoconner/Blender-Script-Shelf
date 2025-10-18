@@ -28,10 +28,8 @@ def python_exec():
     elif isMacOS():
         import sys
         try:
-            # 2.92 and older
             path = bpy.app.binary_path_python
         except AttributeError:
-            # 2.93 and later
             path = sys.executable
         return os.path.abspath(path)
     elif isLinux():
@@ -43,6 +41,11 @@ def python_exec():
 
 def installModule(packageName):
     python_exe = python_exec()
-    subprocess.call([python_exe, "-m", "pip", "install", packageName])
-        
-installModule("pyperclip")
+    packages = packageName.split()
+    subprocess.call([python_exe, "-m", "pip", "install"] + packages)
+
+
+#To install many packacge just write them in the quote separated by spaces, for example "pyperclip pyside6 numpy scipy pillow"
+write_packages_here = "pyperclip"#Write the packages you want to install here
+
+installModule(write_packages_here)
